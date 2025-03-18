@@ -11,7 +11,7 @@
 
     <div style="display: flex; width: 40%; align-items: center; justify-content: center;">
         <button onclick="getLocal()" style="width: 30%; margin-top: 1%;">
-            Get localDescription
+            Get Description
         </button>
         <button onclick="setLocal()" style="width: 30%; margin-top: 1%;">
             Set
@@ -62,6 +62,16 @@
     function handleSendChannelStatusChange(event){
         console.log('handleSendChannelStatusChange:', sendChannel.readyState, event)
     }
+
+    function handleReceiveChannelStatusChange(event) {
+        if (receiveChannel) {
+            console.log(
+            `Receive channel's status has changed to ${receiveChannel.readyState}`
+            );
+        }
+    }
+
+    
     var configuration = {
         iceServers: [{
                 urls: "stun:stun.miwifi.com",
@@ -83,6 +93,16 @@
 
     localConnection.onicecandidate = (e) =>{
         console.log('a on ice candidate',e)
+    }
+
+    localConnection.ondatachannel = (event)=>{
+        receiveChannel = event.channel
+        receiveChannel.onmessage = (event)=>{
+            console.log('event.data', event.data)
+            document.getElementById("res").value = event.data
+        }
+        receiveChannel.onopen = handleReceiveChannelStatusChange;
+        receiveChannel.onclose = handleReceiveChannelStatusChange;
     }
 
     localConnection

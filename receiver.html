@@ -10,7 +10,7 @@
 
     <div style="display: flex; width: 40%; align-items: center; justify-content: center;">
         <button onclick="getLocal()" style="width: 25%; margin-top: 1%;">
-            Get localDescription
+            Get Description
         </button>
         <button onclick="setLocal()" style="width: 25%; margin-top: 1%;">
             Set
@@ -27,7 +27,7 @@
         <h2>Send</h2>    
         <div style="display: flex;">
             <textarea name="" id="sendtextarea" style="width: 100%; resize: none;"></textarea>
-            <button id="send">send</button>
+            <button id="send" onclick="sendMessage()">send</button>
         </div>
     </div>
     <div id="response" style="width: 40%; margin-top: 2%;">
@@ -41,6 +41,12 @@
             }
         ]
     };
+
+    function sendMessage(){
+        var sendtext = document.getElementById("sendtextarea").value
+        console.log("sender send:",sendtext)
+        sendChannel.send(sendtext)
+    }
     function create(){
         localConnection.createAnswer().then(answer =>{
             console.log(answer)
@@ -90,16 +96,28 @@
         receiveChannel.onclose = handleReceiveChannelStatusChange;
     }
 
+    function handleCreateDescriptionError(error) {
+    console.log(`Unable to create an offer: ${error.toString()}`);
+    }
+    
+    function handleSendChannelStatusChange(event){
+        console.log('handleSendChannelStatusChange:', sendChannel.readyState, event)
+    }
+
+    sendChannel = localConnection.createDataChannel("sendChannel");
+
+    sendChannel.onopen = handleSendChannelStatusChange;
+    sendChannel.onclose = handleSendChannelStatusChange;
+
+    sendChannel.onmessage = (event)=>{
+        document.getElementById("res").value = event.data
+        console.log('event.data',event.data)
+    }
+
     function setRemoteDescription(text){
         const desc = JSON.parse(text)
         const res = localConnection.setRemoteDescription(new RTCSessionDescription(desc))
         console.log('set remote res:', res)
-    }
-
-
-    function createAnswer()
-    {
-        
     }
 
 </script>
