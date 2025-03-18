@@ -4,9 +4,57 @@
     <meta charset="UTF-8">
     <title>Sender page</title>
 </head>
-<body>
+<body style="display: flex;flex-direction: column; align-items: center;">
     <h2>Sender page</h2>
+
+    <textarea rows=10 id="local" style="width: 40%; overflow: hidden; user-select: disable; resize: none; height: auto;"></textarea>
+
+    <div style="display: flex; width: 40%; align-items: center; justify-content: center;">
+        <button onclick="getLocal()" style="width: 30%; margin-top: 1%;">
+            Get localDescription
+        </button>
+        <button onclick="setLocal()" style="width: 30%; margin-top: 1%;">
+            Set
+        </button>
+        <button onclick="copy_des()" style="width: 30%; margin-top: 1%;">
+            COPY
+        </button>
+    </div>
+    
+    <div id="sendtext" style="margin-top: 2%; width: 40%;">
+        <h2>Send</h2>    
+        <div style="display: flex;">
+            <textarea name="" id="sendtextarea" style="width: 100%; resize: none;"></textarea>
+            <button id="send" onclick="sendMessage()">send</button>
+        </div>
+    </div>
+    <div id="response" style="width: 40%; margin-top: 2%;">
+        <h2>Response</h2>
+        <textarea name="" id="res" style="width: 100%; resize: none;"></textarea>
+    </div>
+    
 <script>
+
+    function copy_des(){
+        var content = document.getElementById('local');
+        content.select();
+        document.execCommand('copy');
+        alert('Copied!');
+    }
+    function setLocal(){
+        var des_a = document.getElementById("local").value
+        console.log(des_a)
+        setRemoteDescription(JSON.parse(des_a))
+    }
+    function getLocal(){
+        document.getElementById('local').textContent = JSON.stringify(localConnection.localDescription.toJSON())
+    }
+
+    function sendMessage(){
+        var sendtext = document.getElementById("sendtextarea").value
+        console.log("sender send:",sendtext)
+        sendChannel.send(sendtext)
+    }
     function handleCreateDescriptionError(error) {
     console.log(`Unable to create an offer: ${error.toString()}`);
     }
@@ -28,6 +76,7 @@
     sendChannel.onclose = handleSendChannelStatusChange;
 
     sendChannel.onmessage = (event)=>{
+        document.getElementById("res").value = event.data
         console.log('event.data',event.data)
     }
 
