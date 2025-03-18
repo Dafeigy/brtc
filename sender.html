@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sender page</title>
+</head>
+<body>
+    <h2>Sender page</h2>
+<script>
+    function handleCreateDescriptionError(error) {
+    console.log(`Unable to create an offer: ${error.toString()}`);
+    }
+    
+    function handleSendChannelStatusChange(event){
+        console.log('handleSendChannelStatusChange:', sendChannel.readyState, event)
+    }
+    var configuration = {
+        iceServers: [{
+                urls: "stun:stun.miwifi.com",
+            }
+        ]
+    };
+    localConnection = new RTCPeerConnection(configuration);
+
+    sendChannel = localConnection.createDataChannel("sendChannel");
+
+    sendChannel.onopen = handleSendChannelStatusChange;
+    sendChannel.onclose = handleSendChannelStatusChange;
+
+    sendChannel.onmessage = (event)=>{
+        console.log('event.data',event.data)
+    }
+
+
+    localConnection.onicecandidate = (e) =>{
+        console.log('a on ice candidate',e)
+    }
+
+    localConnection
+    .createOffer()
+    .then((offer) => localConnection.setLocalDescription(offer))
+    .then(() =>
+        {
+            console.log('请去设置远程链接符号：', JSON.stringify(localConnection.localDescription.toJSON()))
+        }
+    )
+    .catch(handleCreateDescriptionError);
+
+    function setRemoteDescription(text){
+        const res = localConnection.setRemoteDescription(text)
+        console.log('set remote res:', res)
+    }
+
+</script>
+</body>
+</html>

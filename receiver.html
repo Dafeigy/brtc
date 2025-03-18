@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Receiver page</title>
+</head>
+<body>
+    <h2>Receiver page</h2>
+<script>
+    var configuration = {
+        iceServers: [{
+                urls: "stun:stun.miwifi.com",
+            }
+        ]
+    };
+    function handleCreateDescriptionError(error) {
+    console.log(`Unable to create an offer: ${error.toString()}`);
+    }
+    
+    function handleReceiveChannelStatusChange(event) {
+        if (receiveChannel) {
+            console.log(
+            `Receive channel's status has changed to ${receiveChannel.readyState}`
+            );
+        }
+    }
+    localConnection = new RTCPeerConnection(configuration);
+
+    localConnection.onicecandidate = (e) =>{
+        console.log('a on ice candidate',e)
+    }
+
+    localConnection.ondatachannel = (event)=>{
+        receiveChannel = event.channel
+        receiveChannel.onmessage = (event)=>{
+            console.log('event.data',event.data)
+        }
+        receiveChannel.onopen = handleReceiveChannelStatusChange;
+        receiveChannel.onclose = handleReceiveChannelStatusChange;
+    }
+
+    function setRemoteDescription(text){
+        const desc = JSON.parse(text)
+        const res = localConnection.setRemoteDescription(new RTCSessionDescription(desc))
+        console.log('set remote res:', res)
+    }
+
+
+    function createAnswer()
+    {
+        localConnection.createAnswer().then(answer =>{
+            console.log(answer)
+            localConnection.setLocalDescription(answer)
+        })
+    }
+
+</script>
+</body>
+</html>
